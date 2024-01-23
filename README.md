@@ -1,9 +1,25 @@
 # VideoXum: Cross-modal Visual and Textural Summarization of Videos
 
-This repository is the official PyTorch implementation of VideoXum.
+**This repository is the official PyTorch implementation of VideoXum.**
+
+[[Project Page](https://videoxum.github.io/)]  [[Paper](https://arxiv.org/pdf/2303.12060.pdf)] [[Dataset](https://huggingface.co/datasets/jylins/videoxum)] [[Model Zoo](https://huggingface.co/jylins/vtsum_blip)]
+
+
+## What is cross-modal video summarization?
+Cross-modal video summarization is a novel task in the field of video summarization, extending the scope from single-modal to cross-modal video summarization. This new task focuses on creating video summaries that containing both visual and textual elements with semantic coherence.
+
+## Contents
+- [Dataset](#dataset)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Training](#Training)
+- [Evaluation](#evaluation)
+- [Model Zoo](#model-zoo)
+- [Citation](#citation)
+- [Acknowledgements](#acknowledgements)
 
 ## 1 VideoXum Dataset
-The VideoXum dataset represents a novel task in the field of video summarization, extending the scope from single-modal to cross-modal video summarization. This new task focuses on creating video summaries that containing both visual and textual elements with semantic coherence. Built upon the foundation of ActivityNet Captions, VideoXum is a large-scale dataset, including over 14,000 long-duration and open-domain videos. Each video is paired with 10 corresponding video summaries, amounting to a total of 140,000 video-text summary pairs.
+The VideoXum dataset represents the novel task: cross-modal video summarization. Built upon the foundation of ActivityNet Captions, VideoXum is a large-scale dataset, including over 14,000 long-duration and open-domain videos. Each video is paired with 10 corresponding video summaries, amounting to a total of 140,000 video-text summary pairs.
 
 Download from Huggingface repository of VideoXum ([link](https://huggingface.co/datasets/jylins/videoxum)).
 
@@ -56,15 +72,132 @@ Please download the source videos from ActivityNet Captions datatset following t
 #### 1.2.2 Download VideoXum dataset from Huggingface
 Please download VideoXum dataset from Huggingface ([link](https://huggingface.co/datasets/jylins/videoxum)), including annotations for each video. we provide train/val/test splits.
 
+## 2 Requirements
+- Python 3.8
+- PyTorch == 1.10.1
+- torchvision = 0.11.2
+- CUDA == 11.1
+- timm == 0.4.12
+- transformers == 4.15.0
+- fairscale == 0.4.4
+- ruamel.yaml==0.17.21
+- CLIP == 1.0
+- Other dependencies: pycocoevalcap, opencv-python, scipy, pandas, ftfy, regex, tqdm
 
+## 3 Installation
 
-## 2 TODO
-- [ ] training code of videoxum
-- [ ] evaluation code of videoxum
+- Clone this repository:
 
+  ```bash
+  git clone https://github.com/jylins/videoxum.git
+  ```
 
-## 3 Citation
+- Create a conda virtual environment and activate it:
 
+  ```bash
+  conda create -n videoxum python=3.8 -y
+  conda activate videoxum
+  ```
+
+- Install `PyTorch==1.10.1` and `torchvision==0.11.2` with `CUDA==11.1`:
+
+  ```bash
+  pip install torch==1.10.1 torchvision==0.11.2 --index-url https://download.pytorch.org/whl/cu111
+  ```
+
+- Install `transformers==4.15.0`, `fairscale==0.4.4` and `timm==0.4.12`:
+
+  ```bash
+  pip install transformers==4.15.0
+  pip install fairscale==0.4.4
+  pip install timm==0.4.12
+  ```
+  
+- Install `ruamel.yaml==0.17.21`:
+
+  ```bash
+  pip install ruamel.yaml==0.17.21
+  ```
+
+- Install `clip==1.0`:
+
+  ```bash
+  pip install git+https://github.com/openai/CLIP.git
+  ```
+
+- Install `pycocoevalcap` :
+
+  ```bash
+  cd pycocoevalcap
+  pip install -e .
+  ```
+
+- Install other requirements:
+
+  ```bash
+  pip install -U scikit-learn
+  pip install opencv-python scipy pandas ftfy regex tqdm
+  ```
+
+## 3 Training
+### VTSUM-BLIP + Temporal Transformer (TT)
+```bash
+CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 train_v2vt_sum.py \
+  --config configs/vtsum_blip_tt.yaml \
+  --output_dir PATH_TO_OUTPUT \
+  --model vtsum_blip_tt_ca \
+  --max_epoch 56 \
+  --lambda_tsum 1.0 \
+  --lambda_vsum 10.0 \
+  --batch_size 16 \
+  --ckpt_freq 56
+```
+
+### VTSUM-BLIP + Temporal Transformer (TT) + Context Attention (CA)
+
+```bash
+CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 train_v2vt_sum.py \
+  --config configs/vtsum_blip_tt_ca.yaml \
+  --output_dir PATH_TO_OUTPUT \
+  --model vtsum_blip_tt_ca \
+  --max_epoch 56 \
+  --lambda_tsum 1.0 \
+  --lambda_vsum 15.0 \
+  --init_lr 2e-5 \
+  --kernel_size 5 \
+  --batch_size 16 \
+  --ckpt_freq 56
+```
+## 4 Evaluation
+
+### VTSUM-BLIP + Temporal Transformer (TT)
+```bash
+CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 eval_v2vt_sum.py \
+  --config configs/vtsum_blip_tt.yaml \
+  --output_dir PATH_TO_OUTPUT \
+  --pretrained_model PATH_TO_CKPT/vtsum_tt.pth \
+  --model vtsum_blip_tt
+```
+
+### VTSUM-BLIP + Temporal Transformer (TT) + Context Attention (CA)
+```bash
+CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 eval_v2vt_sum.py \
+  --config configs/vtsum_blip_tt_ca.yaml \
+  --output_dir PATH_TO_OUTPUT \
+  --pretrained_model PATH_TO_CKPT/vtsum_tt_ca.pth \
+  --model vtsum_blip_tt_ca \
+  --kernel_size 5
+```
+
+## 5 Model Zoo
+
+| Version              | Checkpoint                                                                           | F1 score | Kendall | Spearman | BLEU@4 | METEOR | ROUGE-L | CIDEr | VT-CLIPScore |
+|----------------------|--------------------------------------------------------------------------------------|----------|---------|----------|--------|--------|---------|-------|-----------|
+| VTSUM-BLIP + TT      | [vtsum_tt](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt.pth)       | 22.4     | 0.176   | 0.233    | 5.7    | 12.0   | 24.9    | 22.4  | 29.0      |
+| VTSUM-BLIP + TT + CA | [vtsum_tt_ca](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt_ca.pth) | 23.5     | 0.196   | 0.258    | 5.8    | 12.2   | 25.1    | 23.1  | 29.5      |
+Note that the results are slightly different (~0.1%) from what we reported in the paper.
+
+## 6 Citation
 The paper has been accepted by IEEE Transactions on Multimedia.
 ```bash
 @article{lin2023videoxum,
@@ -74,3 +207,5 @@ The paper has been accepted by IEEE Transactions on Multimedia.
   year      = {2023},
 }
 ```
+## 6 Acknowledgements
+This project is built upon the [BLIP](https://github.com/salesforce/BLIP) codebase.

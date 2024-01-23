@@ -1,0 +1,34 @@
+video_embeddings_root: 'dataset/ActivityNet/feat/blip'
+ann_root: 'dataset/ActivityNet/anno'
+clip_root: 'dataset/ActivityNet/feat/vt_clipscore'
+
+# pretrain model
+pretrained: 'outputs/pretrained/model_base_capfilt_large.pth'
+pretrained_clip: 'outputs/vt_clipscore/vt_clip.pth'
+
+# model
+model: 'vtsum_blip_tt_ca'
+vit: 'base'
+vit_grad_ckpt: False
+vit_ckpt_layer: 0
+loss_type: 'cross_entropy'
+tt_depth: 1
+lambda_vsum: 1.0
+kernel_size: 5
+
+image_size: 224
+max_video_length: 512
+
+# generation configs
+max_text_length: 128
+min_text_length: 10
+num_beams: 3
+prompt: 'a video of '
+
+# optimizer
+init_lr: 1e-5
+min_lr: 0
+max_epoch: 28
+batch_size: 16
+weight_decay: 0.05
+
