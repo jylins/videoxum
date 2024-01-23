@@ -197,6 +197,7 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run
 |----------------------|--------------------------------------------------------------------------------------|----------|---------|----------|--------|--------|---------|-------|-----------|
 | VTSUM-BLIP + TT      | [vtsum_tt](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt.pth)       | 22.4     | 0.176   | 0.233    | 5.7    | 12.0   | 24.9    | 22.4  | 29.0      |
 | VTSUM-BLIP + TT + CA | [vtsum_tt_ca](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt_ca.pth) | 23.5     | 0.196   | 0.258    | 5.8    | 12.2   | 25.1    | 23.1  | 29.5      |
+
 Note that the results are slightly different (~0.1%) from what we reported in the paper.
 
 ## 6 Citation
