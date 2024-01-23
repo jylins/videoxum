@@ -8,6 +8,8 @@
 ## What is cross-modal video summarization?
 Cross-modal video summarization is a novel task in the field of video summarization, extending the scope from single-modal to cross-modal video summarization. This new task focuses on creating video summaries that containing both visual and textual elements with semantic coherence.
 
+![videoxum](resources/v2x-sum.png)
+
 ## Contents
 - [Dataset](#dataset)
 - [Requirements](#requirements)
