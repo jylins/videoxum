@@ -3,7 +3,7 @@ ann_root: 'dataset/ActivityNet/anno'
 clip_root: 'dataset/ActivityNet/feat/vt_clipscore'
 
 # pretrain model
-pretrained: 'outputs/pretrained/model_base_capfilt_large.pth'
+pretrained: 'outputs/blip/model_base_capfilt_large.pth'
 pretrained_clip: 'outputs/vt_clipscore/vt_clip.pth'
 
 # model

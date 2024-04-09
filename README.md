@@ -74,6 +74,25 @@ Please download the source videos from ActivityNet Captions datatset following t
 #### 1.2.2 Download VideoXum dataset from Huggingface
 Please download VideoXum dataset from Huggingface ([link](https://huggingface.co/datasets/jylins/videoxum)), including annotations for each video. we provide train/val/test splits.
 
+#### 1.2.3 File Structure of VideoXum dataset
+The file structure of VideoXum looks like:
+```
+dataset
+└── ActivityNet
+    ├── anno
+    │   ├── test_videoxum.json
+    │   ├── train_videoxum.json
+    │   └── val_videoxum.json
+    └── feat
+        ├── blip
+        │   ├── v_00Dk03Jr70M.npz
+        │   └── ...
+        └── vt_clipscore
+            ├── v_00Dk03Jr70M.npz
+            └── ...
+```
+
+
 ## 2 Requirements
 - Python 3.8
 - PyTorch == 1.10.1
@@ -141,12 +160,35 @@ Please download VideoXum dataset from Huggingface ([link](https://huggingface.co
   pip install opencv-python scipy pandas ftfy regex tqdm
   ```
 
-## 3 Training
+
+
+## 3 Model Zoo
+
+| Version              | Checkpoint                                                                           | F1 score | Kendall | Spearman | BLEU@4 | METEOR | ROUGE-L | CIDEr | VT-CLIPScore |
+|----------------------|--------------------------------------------------------------------------------------|----------|---------|----------|--------|--------|---------|-------|-----------|
+| VTSUM-BLIP + TT      | [vtsum_tt](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt.pth)       | 22.4     | 0.176   | 0.233    | 5.7    | 12.0   | 24.9    | 22.4  | 29.0      |
+| VTSUM-BLIP + TT + CA | [vtsum_tt_ca](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt_ca.pth) | 23.5     | 0.196   | 0.258    | 5.8    | 12.2   | 25.1    | 23.1  | 29.5      |
+
+Note that the results are slightly different (~0.1%) from what we reported in the paper.
+The file structure of Model zoo looks like:
+```
+outputs
+├── blip
+│   └── model_base_capfilt_large.pth
+├── vt_clipscore
+│   └── vt_clip.pth
+├── vtsum_tt
+│   └── vtsum_tt.pth
+└── vtsum_tt_ca
+    └── vtsum_tt_ca.pth
+```
+
+## 4 Training
 ### VTSUM-BLIP + Temporal Transformer (TT)
 ```bash
 CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 train_v2vt_sum.py \
   --config configs/vtsum_blip_tt.yaml \
-  --output_dir PATH_TO_OUTPUT \
+  --output_dir outputs/vtsum_tt \
   --model vtsum_blip_tt_ca \
   --max_epoch 56 \
   --lambda_tsum 1.0 \
@@ -160,7 +202,7 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run
 ```bash
 CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 train_v2vt_sum.py \
   --config configs/vtsum_blip_tt_ca.yaml \
-  --output_dir PATH_TO_OUTPUT \
+  --output_dir outputs/vtsum_tt_ca \
   --model vtsum_blip_tt_ca \
   --max_epoch 56 \
   --lambda_tsum 1.0 \
@@ -170,14 +212,14 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run
   --batch_size 16 \
   --ckpt_freq 56
 ```
-## 4 Evaluation
+## 5 Evaluation
 
 ### VTSUM-BLIP + Temporal Transformer (TT)
 ```bash
 CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 eval_v2vt_sum.py \
   --config configs/vtsum_blip_tt.yaml \
-  --output_dir PATH_TO_OUTPUT \
-  --pretrained_model PATH_TO_CKPT/vtsum_tt.pth \
+  --output_dir outputs/vtsum_tt \
+  --pretrained_model outputs/vtsum_tt/vtsum_tt.pth \
   --model vtsum_blip_tt
 ```
 
@@ -185,20 +227,11 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run
 ```bash
 CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 eval_v2vt_sum.py \
   --config configs/vtsum_blip_tt_ca.yaml \
-  --output_dir PATH_TO_OUTPUT \
-  --pretrained_model PATH_TO_CKPT/vtsum_tt_ca.pth \
+  --output_dir outputs/vtsum_tt_ca \
+  --pretrained_model outputs/vtsum_tt_ca/vtsum_tt_ca.pth \
   --model vtsum_blip_tt_ca \
   --kernel_size 5
 ```
-
-## 5 Model Zoo
-
-| Version              | Checkpoint                                                                           | F1 score | Kendall | Spearman | BLEU@4 | METEOR | ROUGE-L | CIDEr | VT-CLIPScore |
-|----------------------|--------------------------------------------------------------------------------------|----------|---------|----------|--------|--------|---------|-------|-----------|
-| VTSUM-BLIP + TT      | [vtsum_tt](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt.pth)       | 22.4     | 0.176   | 0.233    | 5.7    | 12.0   | 24.9    | 22.4  | 29.0      |
-| VTSUM-BLIP + TT + CA | [vtsum_tt_ca](https://huggingface.co/jylins/vtsum_blip/resolve/main/vtsum_tt_ca.pth) | 23.5     | 0.196   | 0.258    | 5.8    | 12.2   | 25.1    | 23.1  | 29.5      |
-
-Note that the results are slightly different (~0.1%) from what we reported in the paper.
 
 ## 6 Citation
 The paper has been accepted by IEEE Transactions on Multimedia.
