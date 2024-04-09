@@ -162,7 +162,7 @@ dataset
 
 
 
-## 3 Model Zoo
+## 4 Model Zoo
 
 | Version              | Checkpoint                                                                           | F1 score | Kendall | Spearman | BLEU@4 | METEOR | ROUGE-L | CIDEr | VT-CLIPScore |
 |----------------------|--------------------------------------------------------------------------------------|----------|---------|----------|--------|--------|---------|-------|-----------|
@@ -183,7 +183,7 @@ outputs
     └── vtsum_tt_ca.pth
 ```
 
-## 4 Training
+## 5 Training
 ### VTSUM-BLIP + Temporal Transformer (TT)
 ```bash
 CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run --nproc_per_node=4 train_v2vt_sum.py \
@@ -212,7 +212,7 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run
   --batch_size 16 \
   --ckpt_freq 56
 ```
-## 5 Evaluation
+## 6 Evaluation
 
 ### VTSUM-BLIP + Temporal Transformer (TT)
 ```bash
@@ -233,7 +233,7 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' OMP_NUM_THREADS=1 python -m torch.distributed.run
   --kernel_size 5
 ```
 
-## 6 Citation
+## 7 Citation
 The paper has been accepted by IEEE Transactions on Multimedia.
 ```bash
 @article{lin2023videoxum,
@@ -243,5 +243,5 @@ The paper has been accepted by IEEE Transactions on Multimedia.
   year      = {2023},
 }
 ```
-## 6 Acknowledgements
+## 8 Acknowledgements
 This project is built upon the [BLIP](https://github.com/salesforce/BLIP) codebase.
